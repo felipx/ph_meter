@@ -5,10 +5,12 @@
  *      Author: felipe
  */
 
-#include <lpc17xx_timer.h>
+//#include <lpc17xx_timer.h>
 
 #include "fsm.h"
+//#include "calibration.h"
 #include "menu.h"
+#include "sensor.h"
 
 event_t event = EV_NONE;
 
@@ -28,39 +30,51 @@ typedef struct {
 
 
 static state_function_t state_func_matrix[] = {
-	// NAME        // INIT           // EXIT           // FUNC
-    {ST_PH,        init_sensor_view, exit_sensor_view, ph_view  },
-    {ST_MV,        init_sensor_view, exit_sensor_view, mv_view  },
-	{ST_MAIN_MENU, init_menu,        exit_menu,        main_menu},
-	{ST_CAL_MENU,  init_menu,        exit_menu,        cal_menu }
+	// NAME           // INIT           // EXIT           // FUNC
+    {ST_PH,           init_sensor_view, exit_sensor_view, ph_view             },
+    {ST_MV,           init_sensor_view, exit_sensor_view, mv_view             },
+	{ST_MAIN_MENU,    init_menu,        exit_menu,        main_menu           },
+	{ST_CAL_MENU,     init_menu,        exit_menu,        cal_menu            },
+	{ST_1P_CAL_START, init_cal_start,   exit_cal_start,   one_point_cal_start },
+	{ST_1P_CAL,       init_cal,         exit_cal,         one_point_cal       },
+	{ST_CAL_COMPLETE, init_cal,         exit_cal,         calibration_complete}
 };
 
 
 static matrix_row_t transition_matrix[] = {
-    // CURR STATE  // EVENT          // NEXT STATE
-    {ST_PH,        EV_SELECT_PUSHED, ST_MAIN_MENU},
-	{ST_MV,        EV_SELECT_PUSHED, ST_MAIN_MENU},
-    {ST_MAIN_MENU, EV_PH_SELECTED  , ST_PH       },
-	{ST_MAIN_MENU, EV_MV_SELECTED  , ST_MV       },
-	{ST_MAIN_MENU, EV_CAL_SELECTED , ST_CAL_MENU },
-	{ST_CAL_MENU,  EV_BACK_SELECTED, ST_MAIN_MENU}
+    // CURR STATE  // EVENT           // NEXT STATE
+    {ST_PH,        EV_SELECT_PUSHED,  ST_MAIN_MENU   },
+	{ST_MV,        EV_SELECT_PUSHED,  ST_MAIN_MENU   },
+    {ST_MAIN_MENU, EV_PH_SELECTED  ,  ST_PH          },
+	{ST_MAIN_MENU, EV_MV_SELECTED  ,  ST_MV          },
+	{ST_MAIN_MENU, EV_CAL_SELECTED ,  ST_CAL_MENU    },
+	{ST_CAL_MENU,  EV_BACK_SELECTED,  ST_MAIN_MENU   },
+	{ST_CAL_MENU,  EV_ONE_P_SELECTED, ST_1P_CAL_START},
+    //{ST_CAL_MENU,  EV_TWO_P_SELECTED, ST_2P_CAL_START}
+    //{ST_CAL_MENU,  EV_THREE_P_SELECTED, ST_3P_CAL_START}
+    {ST_1P_CAL_START, EV_ABORT_CAL,    ST_CAL_MENU    },
+	{ST_1P_CAL_START, EV_START_CAL,    ST_1P_CAL      },
+	{ST_1P_CAL,       EV_ABORT_CAL,    ST_CAL_MENU    },
+	{ST_1P_CAL,       EV_CAL_COMPLETE, ST_CAL_COMPLETE},
+	{ST_CAL_COMPLETE, EV_CAL_COMPLETE, ST_PH          }
+
 };
 
 
 static void process_event(FSM_t *fsm)
 {
 	for (int i=0; i<(sizeof(transition_matrix)/sizeof(transition_matrix[0])); i++) {
-		if ((fsm->current_state == transition_matrix[i].state) && (event == transition_matrix[i].event)) {
-	        event = EV_NONE;
-			fsm->exit_st();
-			fsm->current_state = transition_matrix[i].next_state;
-			fsm->init_st = state_func_matrix[fsm->current_state].init;
-			fsm->exit_st = state_func_matrix[fsm->current_state].exit;
-			fsm->function = state_func_matrix[fsm->current_state].function;
-			fsm->init_st();
-		    break;
-		}
-	}
+	    if ((fsm->current_state == transition_matrix[i].state) && (event == transition_matrix[i].event)) {
+            event = EV_NONE;
+            fsm->exit_st();
+            fsm->current_state = transition_matrix[i].next_state;
+            fsm->init_st = state_func_matrix[fsm->current_state].init;
+            fsm->exit_st = state_func_matrix[fsm->current_state].exit;
+            fsm->function = state_func_matrix[fsm->current_state].function;
+            fsm->init_st();
+            break;
+        }
+    }
 }
 
 

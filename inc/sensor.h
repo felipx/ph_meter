@@ -11,8 +11,8 @@
 #include <stdint.h>
 #include "lcd5110.h"
 
-extern uint32_t *adc_ph_data;
-extern uint32_t adc_ph_samples;
+//extern uint32_t *adc_ph_data;
+//extern uint32_t adc_ph_samples;
 
 void init_sensor_view(void);
 void exit_sensor_view(void);

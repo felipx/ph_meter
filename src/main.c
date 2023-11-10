@@ -158,35 +158,15 @@ void init_adc(void)
 void init_timers(void)
 {
 	// adc timer
-	//TIM_TIMERCFG_Type timer0_cfg;
-	//timer0_cfg.PrescaleOption = TIM_PRESCALE_TICKVAL;
-	//timer0_cfg.PrescaleValue = 250;
-
-	//TIM_MATCHCFG_Type timer0_match0_cfg;
-	//timer0_match0_cfg.MatchChannel = 1;
-	//timer0_match0_cfg.IntOnMatch = ENABLE;
-	//timer0_match0_cfg.StopOnMatch = DISABLE;
-	//timer0_match0_cfg.ResetOnMatch = ENABLE;
-	//timer0_match0_cfg.ExtMatchOutputType = TIM_EXTMATCH_TOGGLE;
-	//timer0_match0_cfg.MatchValue = 49;
-
-	//TIM_ConfigMatch(LPC_TIM0, &timer0_match0_cfg);
-	//TIM_Init(LPC_TIM0, TIM_TIMER_MODE, &timer0_cfg);
+	TIM_TIMERCFG_Type timer0_cfg;
+	timer0_cfg.PrescaleOption = TIM_PRESCALE_TICKVAL;
+	timer0_cfg.PrescaleValue = 250;
+	TIM_Init(LPC_TIM0, TIM_TIMER_MODE, &timer0_cfg);
 
 	// ldc5110 refresh timer
 	TIM_TIMERCFG_Type timer1_cfg;
 	timer1_cfg.PrescaleOption = TIM_PRESCALE_TICKVAL;
-	timer1_cfg.PrescaleValue = 250;
-
-	TIM_MATCHCFG_Type timer1_match_cfg;
-	timer1_match_cfg.MatchChannel = 0;
-	timer1_match_cfg.IntOnMatch = ENABLE;
-	timer1_match_cfg.StopOnMatch = DISABLE;
-	timer1_match_cfg.ResetOnMatch = ENABLE;
-	timer1_match_cfg.ExtMatchOutputType = TIM_EXTMATCH_NOTHING;
-	timer1_match_cfg.MatchValue = 24999;
-
-	TIM_ConfigMatch(LPC_TIM1, &timer1_match_cfg);
+	timer1_cfg.PrescaleValue = 2500;
 	TIM_Init(LPC_TIM1, TIM_TIMER_MODE, &timer1_cfg);
 }
 
@@ -249,8 +229,16 @@ void SysTick_Handler(void)
     		    	event = EV_NONE;
     		    break;
     		case ST_CAL_MENU:
-    			if (select == 3)
+    			if (select == 0)
+    				event = EV_ONE_P_SELECTED;
+    			else if (select == 3)
     				event = EV_BACK_SELECTED;
+    			else
+    				event = EV_NONE;
+    			break;
+    		case ST_1P_CAL_START:
+    			event = EV_START_CAL;
+    			break;
     		default:
     			break;
     		}
@@ -269,13 +257,26 @@ void SysTick_Handler(void)
     	    return;
         }
         else {
-            select--;
-            if ((fsm.current_state == ST_MAIN_MENU) && (select == 0xFF))
-                select = 2;
-            else if ((fsm.current_state == ST_CAL_MENU) && (select == 0xFF))
-            	select = 3;
-            else
-            	select = select;
+        	switch (fsm.current_state) {
+        	case ST_MAIN_MENU:
+        		select--;
+        		if (select == 0xFF)
+        		    select = 2;
+        		break;
+        	case ST_CAL_MENU:
+        		select--;
+        		if (select == 0xFF)
+        		    select = 3;
+        		break;
+        	case ST_1P_CAL_START:
+        		event = EV_ABORT_CAL;
+        		break;
+        	case ST_1P_CAL:
+			    event = EV_ABORT_CAL;
+        	    break;
+        	default:
+        		break;
+        	}
             count = 0;
             SYSTICK_Cmd(DISABLE);
             SYSTICK_IntCmd(DISABLE);
@@ -291,13 +292,26 @@ void SysTick_Handler(void)
     	    return;
         }
         else {
-            select++;
-            if ((fsm.current_state == ST_MAIN_MENU) && (select > 2))
-                select = 0;
-            else if ((fsm.current_state == ST_CAL_MENU) && (select > 3))
-            	select = 0;
-            else
-            	select = select;
+        	switch (fsm.current_state) {
+        	case ST_MAIN_MENU:
+                select++;
+                if (select > 2)
+        		    select = 0;
+                break;
+        	case ST_CAL_MENU:
+                select++;
+        		if (select > 3)
+        		    select = 0;
+        		break;
+        	case ST_1P_CAL_START:
+        		event = EV_ABORT_CAL;
+        		break;
+        	case ST_1P_CAL:
+			    event = EV_ABORT_CAL;
+        	    break;
+        	default:
+        	    break;
+        	}
             count = 0;
             SYSTICK_Cmd(DISABLE);
             SYSTICK_IntCmd(DISABLE);

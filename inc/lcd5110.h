@@ -16,10 +16,11 @@
 
 typedef struct {
 
-	void (*cursor) (unsigned char row, unsigned char col);
+	void (*set_cursor) (unsigned char row, unsigned char col);
 	void (*clear) (void);
 	void (*send_cmd) (char cmd);
 	void (*print_str) (const char str[]);
+	void (*print_big_str) (const char str[]);
 	void (*set_inverse) (uint8_t inv);
 	void (*reset) (void);
 
