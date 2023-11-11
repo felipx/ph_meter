@@ -42,6 +42,8 @@ typedef enum {
     ST_1P_CAL,
     ST_2P_CAL_START,
     ST_2P_CAL,
+    ST_3P_CAL_START,
+    ST_3P_CAL,
     ST_CAL_COMPLETE
 } state_t;
 

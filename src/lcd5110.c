@@ -139,48 +139,42 @@ static const char ascii_table_11x16_bottom[][11] = {
 
 
 typedef enum {
-	CMD,
-	DATA
+    CMD,
+    DATA
 } CMD_t;
 
 
 typedef struct {
-	unsigned char row; // 6 rows
-	unsigned char col; // 14 cols
+    unsigned char row; // 6 rows
+    unsigned char col; // 14 cols
 } coords_t;
 
 coords_t coords;
 
 
 static struct lcd5110_cfg {
-	LPC_SSP_TypeDef* SSPx;
-	uint8_t inverse;
+    LPC_SSP_TypeDef* SSPx;
+    uint8_t inverse;
 } lcd5110_cfg;
-
-
-//static coords_t get_cursor(void)
-//{
-//	return coords;
-//}
 
 
 static void delay(void)
 {
-	for (int i=0; i<200; i++);
+    for (int i=0; i<200; i++);
 }
 
 
 static void write(CMD_t cmd, uint8_t data)
 {
     if (cmd == CMD)
-    	GPIO_ClearValue(0, DC);
+        GPIO_ClearValue(0, DC);
     else if (cmd == DATA) {
         GPIO_SetValue(0, DC);
         if (lcd5110_cfg.inverse)
-        	data = ~data;
+            data = ~data;
     }
     else
-    	return;
+        return;
 
     SSP_SendData(lcd5110_cfg.SSPx, (uint16_t)(data & 0x00FF));
 }
@@ -188,8 +182,8 @@ static void write(CMD_t cmd, uint8_t data)
 
 static void send_cmd(char cmd)
 {
-	write(CMD, cmd);
-	delay();
+    write(CMD, cmd);
+    delay();
 }
 
 
@@ -209,8 +203,8 @@ static void clear(void)
 {
     set_cursor(0,0);
     for (int pixel = (LCD_WIDTH * LCD_HEIGHT / 8); pixel > 0; pixel--) {
-    	write(DATA, 0x00);
-    	delay();
+        write(DATA, 0x00);
+        delay();
     }
 }
 
@@ -221,7 +215,7 @@ static void print_str(const char str[])
     while (str[index] != '\0') {
         if ((str[index] >= 0x20) & (str[index] <= 0x7F)) {
             for (int i = 0; i < 5; i++) {
-            	write(DATA, ascii_table[str[index] - 0x20][i]);
+                write(DATA, ascii_table[str[index] - 0x20][i]);
                 delay();
             }
             write(DATA, 0x00);
@@ -238,7 +232,7 @@ static void print_big_str(const char str[])
     while (str[index] != '\0') {
         if ((str[index] >= 0x2D) & (str[index] <= 0x39)) {
             for (int i = 0; i < 11; i++) {
-            	write(DATA, ascii_table_11x16_top[str[index] - 0x2D][i]);
+                write(DATA, ascii_table_11x16_top[str[index] - 0x2D][i]);
                 delay();
             }
             write(DATA, 0x00);
@@ -253,7 +247,7 @@ static void print_big_str(const char str[])
     while (str[index] != '\0') {
         if ((str[index] >= 0x2D) & (str[index] <= 0x39)) {
             for (int i = 0; i < 11; i++) {
-            	write(DATA, ascii_table_11x16_bottom[str[index] - 0x2D][i]);
+                write(DATA, ascii_table_11x16_bottom[str[index] - 0x2D][i]);
                 delay();
             }
             write(DATA, 0x00);
@@ -266,42 +260,42 @@ static void print_big_str(const char str[])
 
 static void set_inverse(uint8_t inv)
 {
-	if (inv)
-	    lcd5110_cfg.inverse = 1;
-	else
-		lcd5110_cfg.inverse = 0;
+    if (inv)
+        lcd5110_cfg.inverse = 1;
+    else
+        lcd5110_cfg.inverse = 0;
 }
 
 
 static void reset(void)
 {
-	GPIO_ClearValue(0, RST);
-	for (int i=0; i<10000; i++);
-	GPIO_SetValue(0, RST);
+    GPIO_ClearValue(0, RST);
+    for (int i=0; i<10000; i++);
+    GPIO_SetValue(0, RST);
 }
 
 
 void init_lcd5110(LCD5110_t *lcd5110, LPC_SSP_TypeDef* SSPx)
 {
-	if (SSPx == LPC_SSP0 || SSPx == LPC_SSP1) {
-		lcd5110_cfg.SSPx = SSPx;
-	}
-	else
-		return;
+    if (SSPx == LPC_SSP0 || SSPx == LPC_SSP1) {
+        lcd5110_cfg.SSPx = SSPx;
+    }
+    else
+        return;
 
-	lcd5110->clear = clear;
-	lcd5110->set_cursor = set_cursor;
-	lcd5110->print_str = print_str;
-	lcd5110->print_big_str = print_big_str;
-	lcd5110->send_cmd = send_cmd;
-	lcd5110->set_inverse = set_inverse;
-	lcd5110->reset = reset;
+    lcd5110->clear = clear;
+    lcd5110->set_cursor = set_cursor;
+    lcd5110->print_str = print_str;
+    lcd5110->print_big_str = print_big_str;
+    lcd5110->send_cmd = send_cmd;
+    lcd5110->set_inverse = set_inverse;
+    lcd5110->reset = reset;
 
-	lcd5110->set_inverse(0);
-	lcd5110->reset();
-	lcd5110->send_cmd(0x21);
-	lcd5110->send_cmd(0xB2);
-	lcd5110->send_cmd(0x20);
-	lcd5110->send_cmd(0x0C);
-	lcd5110->clear();
+    lcd5110->set_inverse(0);
+    lcd5110->reset();
+    lcd5110->send_cmd(0x21);
+    lcd5110->send_cmd(0xB2);
+    lcd5110->send_cmd(0x20);
+    lcd5110->send_cmd(0x0C);
+    lcd5110->clear();
 }

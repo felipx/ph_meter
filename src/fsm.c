@@ -31,15 +31,17 @@ typedef struct {
 
 static state_function_t state_func_matrix[] = {
     // NAME           // INIT           // EXIT           // FUNC
-    {ST_PH,           init_sensor_view, exit_sensor_view, ph_view             },
-    {ST_MV,           init_sensor_view, exit_sensor_view, mv_view             },
-    {ST_MAIN_MENU,    init_menu,        exit_menu,        main_menu           },
-    {ST_CAL_MENU,     init_menu,        exit_menu,        cal_menu            },
-    {ST_1P_CAL_START, init_cal_start,   exit_cal_start,   one_point_cal_start },
-    {ST_1P_CAL,       init_cal,         exit_cal,         one_point_cal       },
-    {ST_2P_CAL_START, init_cal_start,   exit_cal_start,   two_point_cal_start },
-    {ST_2P_CAL,       init_cal,         exit_cal,         two_point_cal       },
-    {ST_CAL_COMPLETE, init_cal,         exit_cal,         calibration_complete}
+    {ST_PH,           init_sensor_view, exit_sensor_view, ph_view              },
+    {ST_MV,           init_sensor_view, exit_sensor_view, mv_view              },
+    {ST_MAIN_MENU,    init_menu,        exit_menu,        main_menu            },
+    {ST_CAL_MENU,     init_menu,        exit_menu,        cal_menu             },
+    {ST_1P_CAL_START, init_cal_start,   exit_cal_start,   one_point_cal_start  },
+    {ST_1P_CAL,       init_cal,         exit_cal,         one_point_cal        },
+    {ST_2P_CAL_START, init_cal_start,   exit_cal_start,   two_point_cal_start  },
+    {ST_2P_CAL,       init_cal,         exit_cal,         two_point_cal        },
+	{ST_3P_CAL_START, init_cal_start,   exit_cal_start,   three_point_cal_start},
+	{ST_3P_CAL,       init_cal,         exit_cal,         three_point_cal      },
+    {ST_CAL_COMPLETE, init_cal,         exit_cal,         calibration_complete }
 };
 
 
@@ -52,7 +54,7 @@ static matrix_row_t transition_matrix[] = {
     {ST_MAIN_MENU,    EV_CAL_SELECTED ,    ST_CAL_MENU    },
     {ST_CAL_MENU,     EV_ONE_P_SELECTED,   ST_1P_CAL_START},
     {ST_CAL_MENU,     EV_TWO_P_SELECTED,   ST_2P_CAL_START},
-  //{ST_CAL_MENU,     EV_THREE_P_SELECTED, ST_3P_CAL_START},
+    {ST_CAL_MENU,     EV_THREE_P_SELECTED, ST_3P_CAL_START},
     {ST_CAL_MENU,     EV_BACK_SELECTED,    ST_MAIN_MENU   },
     {ST_1P_CAL_START, EV_ABORT_CAL,        ST_CAL_MENU    },
     {ST_1P_CAL_START, EV_START_CAL,        ST_1P_CAL      },
@@ -63,6 +65,11 @@ static matrix_row_t transition_matrix[] = {
     {ST_2P_CAL,       EV_ABORT_CAL,        ST_CAL_MENU    },
     {ST_2P_CAL,       EV_POINT_COMPLETE,   ST_2P_CAL_START},
     {ST_2P_CAL,       EV_CAL_COMPLETE,     ST_CAL_COMPLETE},
+	{ST_3P_CAL_START, EV_ABORT_CAL,        ST_CAL_MENU    },
+	{ST_3P_CAL_START, EV_START_CAL,        ST_3P_CAL      },
+    {ST_3P_CAL,       EV_ABORT_CAL,        ST_CAL_MENU    },
+    {ST_3P_CAL,       EV_POINT_COMPLETE,   ST_3P_CAL_START},
+    {ST_3P_CAL,       EV_CAL_COMPLETE,     ST_CAL_COMPLETE},
     {ST_CAL_COMPLETE, EV_CAL_COMPLETE,     ST_PH          }
 };
 

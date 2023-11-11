@@ -24,6 +24,8 @@ void one_point_cal_start(LCD5110_t *lcd5110);
 void one_point_cal(LCD5110_t *lcd5110);
 void two_point_cal_start(LCD5110_t *lcd5110);
 void two_point_cal(LCD5110_t *lcd5110);
+void three_point_cal_start(LCD5110_t *lcd5110);
+void three_point_cal(LCD5110_t *lcd5110);
 void calibration_complete(LCD5110_t *lcd5110);
 
 

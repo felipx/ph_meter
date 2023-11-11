@@ -16,7 +16,7 @@
 
 // ADC timer 0
 static TIM_MATCHCFG_Type timer0_match1_cfg = {.MatchChannel = 1,
-		                                      .IntOnMatch = ENABLE,
+    	                                      .IntOnMatch = ENABLE,
                                               .StopOnMatch = DISABLE,
                                               .ResetOnMatch = ENABLE,
                                               .ExtMatchOutputType = TIM_EXTMATCH_TOGGLE,

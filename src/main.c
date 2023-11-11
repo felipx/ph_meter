@@ -245,6 +245,9 @@ void SysTick_Handler(void)
             case ST_2P_CAL_START:
                 event = EV_START_CAL;
                 break;
+            case ST_3P_CAL_START:
+                event = EV_START_CAL;
+                break;
             default:
                 event = EV_NONE;
                 break;
@@ -287,6 +290,12 @@ void SysTick_Handler(void)
             case ST_2P_CAL:
                 event = EV_ABORT_CAL;
                 break;
+            case ST_3P_CAL_START:
+                event = EV_ABORT_CAL;
+                break;
+            case ST_3P_CAL:
+                event = EV_ABORT_CAL;
+                break;
             default:
                 event = EV_NONE;
                 break;
@@ -327,6 +336,12 @@ void SysTick_Handler(void)
                 event = EV_ABORT_CAL;
                 break;
             case ST_2P_CAL:
+                event = EV_ABORT_CAL;
+                break;
+            case ST_3P_CAL_START:
+                event = EV_ABORT_CAL;
+                break;
+            case ST_3P_CAL:
                 event = EV_ABORT_CAL;
                 break;
             default:
