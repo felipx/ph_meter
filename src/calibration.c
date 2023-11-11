@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <lpc17xx_gpdma.h>
 #include <lpc17xx_timer.h>
 
 #include "fsm.h"
@@ -19,7 +20,15 @@ float slope = -0.2357;
 uint32_t *adc_ph_data = (uint32_t *) 0x2007C000;
 uint32_t adc_ph_samples = 1024;
 
+// ADC timer 0
+static TIM_MATCHCFG_Type timer0_match1_cfg = {.MatchChannel = 1,
+		                                      .IntOnMatch = ENABLE,
+                                              .StopOnMatch = DISABLE,
+                                              .ResetOnMatch = ENABLE,
+                                              .ExtMatchOutputType = TIM_EXTMATCH_TOGGLE,
+                                              .MatchValue = 49};
 
+// lcd5110 refresh timer 1
 static TIM_MATCHCFG_Type timer1_match0_cfg = {.MatchChannel = 0,
 		                                      .IntOnMatch = ENABLE,
 											  .StopOnMatch = DISABLE,
@@ -31,9 +40,13 @@ static uint8_t count = COUNT_START;
 static uint32_t adc_val = 0;
 static uint32_t cal_buffer[COUNT_START];
 
+static uint8_t point = 0;
+static float pH[3] = {7.0, 10.0, 4.0};
+static float mv[3] = {0.0, 0.0, 0.0};
+
+
 void init_cal_start(void)
 {
-	// maybe match1.0 menu config here
     TIM_ResetCounter(LPC_TIM1);
     TIM_Cmd(LPC_TIM1, ENABLE);
 }
@@ -47,16 +60,24 @@ void exit_cal_start(void)
 
 void init_cal(void)
 {
-	TIM_ConfigMatch(LPC_TIM1, &timer1_match0_cfg);
-	TIM_ResetCounter(LPC_TIM1);
-	TIM_Cmd(LPC_TIM1, ENABLE);
+    TIM_ConfigMatch(LPC_TIM0, &timer0_match1_cfg);
+    TIM_ResetCounter(LPC_TIM0);
+    TIM_Cmd(LPC_TIM0, ENABLE);
+
+    TIM_ConfigMatch(LPC_TIM1, &timer1_match0_cfg);
+    TIM_ResetCounter(LPC_TIM1);
+    TIM_Cmd(LPC_TIM1, ENABLE);
+
+    GPDMA_ChannelCmd(0, ENABLE);
 }
 
 
 void exit_cal(void)
 {
-	count = COUNT_START;
+    count = COUNT_START;
+    TIM_Cmd(LPC_TIM0, DISABLE);
     TIM_Cmd(LPC_TIM1, DISABLE);
+    GPDMA_ChannelCmd(0, DISABLE);
 }
 
 
@@ -83,45 +104,123 @@ void one_point_cal_start(LCD5110_t *lcd5110)
 
 void one_point_cal(LCD5110_t *lcd5110)
 {
-	char count_buf[8];
+    char count_buf[8];
 
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
+
+    snprintf(count_buf, 8, "0:%d", count--);
 
     lcd5110->clear();
     lcd5110->set_cursor(0,1);
     lcd5110->print_str("1 POINT CAL");
     lcd5110->set_cursor(1,5);
     lcd5110->print_str("pH 7");
+    lcd5110->set_cursor(3,5);
+    lcd5110->print_str(count_buf);
 
-	snprintf(count_buf, 8, "0:%d", count--);
-	//lcd5110->clear();
-	lcd5110->set_cursor(3,5);
-	lcd5110->print_str(count_buf);
-
-	adc_val = 0;
-	for (uint32_t i=0; i<adc_ph_samples; i++)
-		adc_val += (*(adc_ph_data + i) >> 4) & 0xFFF;
-	adc_val /= adc_ph_samples;
+    adc_val = 0;
+    for (uint32_t i=0; i<adc_ph_samples; i++)
+	    adc_val += (*(adc_ph_data + i) >> 4) & 0xFFF;
+    adc_val /= adc_ph_samples;
 
     if (count != 0xFF)
         cal_buffer[count] = adc_val;
 
     if (count == 0xFF) {
-		count = 30;
+        count = 30;
 
-	    uint32_t cal_avg = 0;
-	    uint32_t pH = 7;
+        uint32_t cal_avg = 0;
 
         for (uint8_t i=0; i<(uint8_t)COUNT_START; i++)
-        	cal_avg += cal_buffer[i];
+            cal_avg += cal_buffer[i];
         cal_avg /= (uint8_t) COUNT_START;
 
+        pH[0] = 7.0;
         offset = 3.3;
-        slope = (((float)cal_avg/4095)*3.3 - offset)/((float)pH);
+        slope = (((float)cal_avg/4095.0)*3.3 - offset)/((float)pH[0]);
 
         event = EV_CAL_COMPLETE;
-	}
+    }
+}
+
+
+void two_point_cal_start(LCD5110_t *lcd5110)
+{
+    while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
+    TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
+
+    lcd5110->clear();
+    lcd5110->set_cursor(0,1);
+    lcd5110->print_str("1 POINT CAL");
+    lcd5110->set_cursor(1,0);
+    lcd5110->print_str("Insert Probe");
+    lcd5110->set_cursor(2,0);
+    if (point == 0)
+        lcd5110->print_str("Into pH 4");
+    else
+        lcd5110->print_str("Into pH 10");
+    lcd5110->set_cursor(3,0);
+    lcd5110->print_str("Solution. Then");
+    lcd5110->set_cursor(4,0);
+    lcd5110->print_str("Press ENTER to");
+    lcd5110->set_cursor(5,0);
+    lcd5110->print_str("Start");
+}
+
+
+void two_point_cal(LCD5110_t *lcd5110)
+{
+    char count_buf[8];
+
+    while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
+    TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
+
+    snprintf(count_buf, 8, "0:%d", count--);
+
+    lcd5110->clear();
+    lcd5110->set_cursor(0,1);
+    lcd5110->print_str("2 POINT CAL");
+    lcd5110->set_cursor(1,5);
+    if (point == 0)
+        lcd5110->print_str("pH 4");
+    else
+        lcd5110->print_str("pH 10");
+    lcd5110->set_cursor(3,5);
+    lcd5110->print_str(count_buf);
+
+    adc_val = 0;
+    for (uint32_t i=0; i<adc_ph_samples; i++)
+	    adc_val += (*(adc_ph_data + i) >> 4) & 0xFFF;
+    adc_val /= adc_ph_samples;
+
+    if (count != 0xFF)
+        cal_buffer[count] = adc_val;
+
+    if (count == 0xFF) {
+        count = 30;
+
+        uint32_t cal_avg = 0;
+
+        for (uint8_t i=0; i<(uint8_t)COUNT_START; i++)
+            cal_avg += cal_buffer[i];
+        cal_avg /= (uint8_t) COUNT_START;
+
+        if (point == 0) {
+            point++;
+            pH[0] = 4.0;
+            mv[0] = ((float)cal_avg/4095.0)*3.3;
+            event = EV_POINT_COMPLETE;
+        }
+        else {
+            point = 0;
+            pH[1] = 10.0;
+            mv[1] = ((float)cal_avg/4095.0)*3.3;
+            slope = (mv[1]-mv[0])/(pH[1]-pH[0]);
+            offset = mv[1] - slope*pH[1];
+            event = EV_CAL_COMPLETE;
+        }
+    }
 }
 
 
@@ -140,7 +239,7 @@ void calibration_complete(LCD5110_t *lcd5110)
 
     i++;
     if (i == 3) {
-    	i = 0;
+        i = 0;
     event = EV_CAL_COMPLETE;
     }
 }
