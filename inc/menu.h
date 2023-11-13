@@ -14,7 +14,7 @@ extern char select;
 
 void init_menu(void);
 void exit_menu(void);
-void main_menu(LCD5110_t *lcd5110);
-void cal_menu(LCD5110_t *lcd5110);
+void main_menu(void);
+void cal_menu(void);
 
 #endif /* MENU_H_ */

@@ -18,7 +18,7 @@ typedef struct {
     state_t state;
     void (*init) (void);
     void (*exit) (void);
-    void (*function) (LCD5110_t *lcd5110);
+    void (*function) ();
 } state_function_t;
 
 
@@ -39,8 +39,8 @@ static state_function_t state_func_matrix[] = {
     {ST_1P_CAL,       init_cal,         exit_cal,         one_point_cal        },
     {ST_2P_CAL_START, init_cal_start,   exit_cal_start,   two_point_cal_start  },
     {ST_2P_CAL,       init_cal,         exit_cal,         two_point_cal        },
-	{ST_3P_CAL_START, init_cal_start,   exit_cal_start,   three_point_cal_start},
-	{ST_3P_CAL,       init_cal,         exit_cal,         three_point_cal      },
+    {ST_3P_CAL_START, init_cal_start,   exit_cal_start,   three_point_cal_start},
+    {ST_3P_CAL,       init_cal,         exit_cal,         three_point_cal      },
     {ST_CAL_COMPLETE, init_cal,         exit_cal,         calibration_complete }
 };
 
@@ -65,8 +65,8 @@ static matrix_row_t transition_matrix[] = {
     {ST_2P_CAL,       EV_ABORT_CAL,        ST_CAL_MENU    },
     {ST_2P_CAL,       EV_POINT_COMPLETE,   ST_2P_CAL_START},
     {ST_2P_CAL,       EV_CAL_COMPLETE,     ST_CAL_COMPLETE},
-	{ST_3P_CAL_START, EV_ABORT_CAL,        ST_CAL_MENU    },
-	{ST_3P_CAL_START, EV_START_CAL,        ST_3P_CAL      },
+    {ST_3P_CAL_START, EV_ABORT_CAL,        ST_CAL_MENU    },
+    {ST_3P_CAL_START, EV_START_CAL,        ST_3P_CAL      },
     {ST_3P_CAL,       EV_ABORT_CAL,        ST_CAL_MENU    },
     {ST_3P_CAL,       EV_POINT_COMPLETE,   ST_3P_CAL_START},
     {ST_3P_CAL,       EV_CAL_COMPLETE,     ST_CAL_COMPLETE},
@@ -95,7 +95,7 @@ static void run(FSM_t *fsm)
 {
     while (1) {
         process_event(fsm);
-        fsm->function(fsm->lcd5110);
+        fsm->function();
     }
 }
 

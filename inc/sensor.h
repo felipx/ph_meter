@@ -16,8 +16,8 @@
 
 void init_sensor_view(void);
 void exit_sensor_view(void);
-void ph_view(LCD5110_t *lcd5110);
-void mv_view(LCD5110_t *lcd5110);
+void ph_view(void);
+void mv_view(void);
 
 
 #endif /* SENSOR_H_ */

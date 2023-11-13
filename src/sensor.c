@@ -56,8 +56,9 @@ void exit_sensor_view(void)
 }
 
 
-void ph_view(LCD5110_t *lcd5110)
+void ph_view(void)
 {
+	LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
     char data_buf[8];
     char slope_buf[8];
     float pH;
@@ -91,8 +92,9 @@ void ph_view(LCD5110_t *lcd5110)
 }
 
 
-void mv_view(LCD5110_t *lcd5110)
+void mv_view(void)
 {
+	LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
     static float mv_val = 0;
     char data_buf[8];
     adc_val = 0;

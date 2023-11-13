@@ -13,6 +13,7 @@
 #define DC (1 << 2)
 #define RST (1 << 3)
 
+#define LCD5110_ADDR (0x20080000)
 
 typedef struct {
 

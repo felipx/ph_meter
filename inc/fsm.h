@@ -55,7 +55,7 @@ typedef struct state_machine {
     state_t current_state;
     void (*init_st) (void);
     void (*exit_st) (void);
-    void (*function) (LCD5110_t *);
+    void (*function) (void);
     void (*run) (FSM_t* fsm);
 } FSM_t;
 

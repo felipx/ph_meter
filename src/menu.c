@@ -34,8 +34,10 @@ void exit_menu(void)
 }
 
 
-void main_menu(LCD5110_t *lcd5110)
+void main_menu(void)
 {
+	LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
+
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
@@ -72,8 +74,11 @@ void main_menu(LCD5110_t *lcd5110)
 }
 
 
-void cal_menu(LCD5110_t *lcd5110)
+void cal_menu(void)
 {
+
+	LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
+
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 

@@ -7,11 +7,13 @@
 #include <lpc17xx_adc.h>
 #include <lpc17xx_gpdma.h>
 #include <lpc17xx_gpio.h>
+#include <lpc17xx_i2c.h>
 #include <lpc17xx_pinsel.h>
 #include <lpc17xx_ssp.h>
 #include <lpc17xx_systick.h>
 #include <lpc17xx_timer.h>
 
+#include "eeprom.h"
 #include "fsm.h"
 #include "lcd5110.h"
 #include "menu.h"
@@ -23,6 +25,7 @@
 
 
 void init_gpio(void);
+void init_i2c(void);
 void init_spi(void);
 void init_dma(void);
 void init_adc(void);
@@ -31,19 +34,25 @@ void init_systick(void);
 void init_interrupts(void);
 
 FSM_t fsm;
+LCD5110_t lcd_5110;
+AT24C_t at24c08_eeprom;
 
 GPDMA_LLI_Type adc_lli;
 
-//uint32_t *adc_data = (uint32_t *) 0x2007C000;
 
 int main(void)
 {
     for (int i=0; i<1024; i++)
         *(adc_ph_data + i) = (uint32_t) 0;
 
-    LCD5110_t lcd5110;
+    LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
+    *lcd5110 = lcd_5110;
+
+    AT24C_t *at24c08 =(AT24C_t *) AT24C_ADDR;
+    *at24c08 = at24c08_eeprom;
 
     init_gpio();
+    init_i2c();
     init_spi();
     init_dma();
     init_adc();
@@ -51,16 +60,15 @@ int main(void)
     init_systick();
     init_interrupts();
 
-    init_lcd5110(&lcd5110, LPC_SSP1);
-    init_fsm(&fsm, &lcd5110);
+    init_lcd5110(lcd5110, LPC_SSP1);
+    init_eeprom(at24c08, (uint8_t) 0x50, LPC_I2C1);
+    init_fsm(&fsm, lcd5110);
 
-    lcd5110.print_str("initializing");
+    lcd5110->print_str("initializing");
     for (int i=0; i<10000000; i++);
-    lcd5110.clear();
+    lcd5110->clear();
 
     fsm.run(&fsm);
-
-  //  for(;;);
 }
 
 
@@ -84,6 +92,12 @@ void init_gpio(void)
     GPIO_SetDir(0, RST, 1);
     GPIO_SetValue(0, RST);
 
+    // AT24C08 I2C GPIO
+    PINSEL_CFG_Type p0_1_cfg = {.Portnum=PINSEL_PORT_0, .Pinnum=PINSEL_PIN_1, .Funcnum=PINSEL_FUNC_3, .Pinmode=PINSEL_PINMODE_TRISTATE, .OpenDrain=PINSEL_PINMODE_OPENDRAIN}; // SCL1
+    PINSEL_ConfigPin(&p0_1_cfg);
+    PINSEL_CFG_Type p0_0_cfg = {.Portnum=PINSEL_PORT_0, .Pinnum=PINSEL_PIN_0, .Funcnum=PINSEL_FUNC_3, .Pinmode=PINSEL_PINMODE_TRISTATE, .OpenDrain=PINSEL_PINMODE_OPENDRAIN}; // SDA1
+    PINSEL_ConfigPin(&p0_0_cfg);
+
     // ADC pH sensor GPIO
     PINSEL_CFG_Type p0_23_cfg = {.Portnum=PINSEL_PORT_0, .Pinnum=PINSEL_PIN_23, .Funcnum=PINSEL_FUNC_1, .Pinmode=PINSEL_PINMODE_TRISTATE, .OpenDrain=PINSEL_PINMODE_NORMAL}; //AIN0
     PINSEL_ConfigPin(&p0_23_cfg);
@@ -100,6 +114,13 @@ void init_gpio(void)
     GPIO_SetDir(2, UP, 0);
     GPIO_SetDir(2, DOWN, 0);
     GPIO_IntCmd(2, SEL | UP | DOWN, 1);
+}
+
+
+void init_i2c(void)
+{
+    I2C_Init(LPC_I2C1, 10000);
+    I2C_Cmd(LPC_I2C1, ENABLE);
 }
 
 
