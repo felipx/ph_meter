@@ -17,31 +17,43 @@ static void write_byte(uint8_t data, uint16_t addr)
 }
 
 
+static void write_half_word(uint16_t data, uint16_t addr)
+{
+
+}
+
+
+static void write_word(uint32_t data, uint16_t addr)
+{
+
+}
+
+
 static void write_data(uint8_t *data, uint32_t size, uint16_t addr)
 {
 
 }
 
 
-static void write_float(float data, uint16_t addr)
+static void read_byte(uint8_t *dest, uint16_t addr)
 {
 
 }
 
 
-static void read_byte(uint8_t *data, uint16_t addr)
+static void read_half_word(uint8_t *dest, uint16_t addr)
 {
 
 }
 
 
-static read_data(uint8_t *data, uint32_t size, uint16_t addr)
+static void read_word(uint8_t *dest, uint16_t addr)
 {
 
 }
 
 
-static read_float(float *data, uint16_t addr)
+static void read_data(uint8_t *dest, uint32_t size, uint16_t addr)
 {
 
 }
@@ -53,9 +65,11 @@ void init_eeprom(AT24C_t *eeprom, uint8_t dev_Addr, LPC_I2C_TypeDef *I2Cx)
     i2c_master_cfg.retransmissions_max = 0;
 
     eeprom->write_byte = write_byte;
+    eeprom->write_half_word = write_half_word;
+    eeprom->write_word = write_word;
     eeprom->write_data = write_data;
-    eeprom->write_float = write_float;
     eeprom->read_byte = read_byte;
+    eeprom->read_half_word = read_half_word;
+    eeprom->read_word = read_word;
     eeprom->read_data = read_data;
-    eeprom->read_float = read_float;
 }

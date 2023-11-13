@@ -8,10 +8,6 @@
 #ifndef FSM_H_
 #define FSM_H_
 
-//#include "sensor.h"
-#include "calibration.h"
-#include "lcd5110.h"
-
 
 typedef enum {
     EV_ANY,
@@ -51,7 +47,6 @@ typedef enum {
 typedef struct state_machine FSM_t;
 
 typedef struct state_machine {
-    LCD5110_t *lcd5110;
     state_t current_state;
     void (*init_st) (void);
     void (*exit_st) (void);
@@ -60,7 +55,7 @@ typedef struct state_machine {
 } FSM_t;
 
 
-void init_fsm(FSM_t *fsm, LCD5110_t *lcd5110);
+void init_fsm(FSM_t *fsm);
 
 
 #endif /* FSM_H_ */

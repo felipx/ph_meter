@@ -17,6 +17,7 @@
 #include "fsm.h"
 #include "lcd5110.h"
 #include "menu.h"
+#include "sensor.h"
 
 
 #define SEL (1 << 12)
@@ -36,12 +37,14 @@ void init_interrupts(void);
 FSM_t fsm;
 LCD5110_t lcd_5110;
 AT24C_t at24c08_eeprom;
+SENSOR_t pHsensor;
 
 GPDMA_LLI_Type adc_lli;
 
 
 int main(void)
 {
+    uint32_t *adc_ph_data = (uint32_t *) DATA_ADDR;
     for (int i=0; i<1024; i++)
         *(adc_ph_data + i) = (uint32_t) 0;
 
@@ -50,6 +53,9 @@ int main(void)
 
     AT24C_t *at24c08 =(AT24C_t *) AT24C_ADDR;
     *at24c08 = at24c08_eeprom;
+
+    SENSOR_t *ph_sensor = (SENSOR_t *) SENSOR_ADDR;
+    *ph_sensor = pHsensor;
 
     init_gpio();
     init_i2c();
@@ -62,7 +68,8 @@ int main(void)
 
     init_lcd5110(lcd5110, LPC_SSP1);
     init_eeprom(at24c08, (uint8_t) 0x50, LPC_I2C1);
-    init_fsm(&fsm, lcd5110);
+    init_sensor(ph_sensor);
+    init_fsm(&fsm);
 
     lcd5110->print_str("initializing");
     for (int i=0; i<10000000; i++);
@@ -137,6 +144,9 @@ void init_spi(void)
 
 void init_dma(void)
 {
+    uint32_t *adc_ph_data = (uint32_t *) DATA_ADDR;
+    uint32_t adc_ph_samples = (uint32_t) N_SAMPLES;
+
     // ADC channel 0
     GPDMA_Channel_CFG_Type dma_ch0_cfg;
     dma_ch0_cfg.ChannelNum = 0;

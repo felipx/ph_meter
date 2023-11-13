@@ -9,16 +9,15 @@
 #include <lpc17xx_gpdma.h>
 #include <lpc17xx_timer.h>
 
-#include "fsm.h"
 #include "calibration.h"
+#include "fsm.h"
+#include "sensor.h"
 
 #define COUNT_START 30
 
 float offset = 3.3;
 float slope = -0.2357;
 
-uint32_t *adc_ph_data = (uint32_t *) 0x2007C000;
-uint32_t adc_ph_samples = 1024;
 
 // ADC timer 0
 static TIM_MATCHCFG_Type timer0_match1_cfg = {.MatchChannel = 1,
@@ -37,7 +36,6 @@ static TIM_MATCHCFG_Type timer1_match0_cfg = {.MatchChannel = 0,
                                               .MatchValue = 9999};
 
 static uint8_t count = COUNT_START;
-static uint32_t adc_val = 0;
 static uint32_t cal_buffer[COUNT_START];
 
 static uint8_t point = 0;
@@ -81,8 +79,10 @@ void exit_cal(void)
 }
 
 
-void one_point_cal_start(LCD5110_t *lcd5110)
+void one_point_cal_start(void)
 {
+    LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
+
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
@@ -102,9 +102,12 @@ void one_point_cal_start(LCD5110_t *lcd5110)
 }
 
 
-void one_point_cal(LCD5110_t *lcd5110)
+void one_point_cal(void)
 {
+    LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
+    SENSOR_t *ph_sensor = (SENSOR_t *) SENSOR_ADDR;
     char count_buf[8];
+    uint32_t adc_val = 0;
 
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
@@ -119,10 +122,7 @@ void one_point_cal(LCD5110_t *lcd5110)
     lcd5110->set_cursor(3,5);
     lcd5110->print_str(count_buf);
 
-    adc_val = 0;
-    for (uint32_t i=0; i<adc_ph_samples; i++)
-        adc_val += (*(adc_ph_data + i) >> 4) & 0xFFF;
-    adc_val /= adc_ph_samples;
+    adc_val = ph_sensor->read_samples();
 
     if (count != 0xFF)
         cal_buffer[count] = adc_val;
@@ -146,8 +146,10 @@ void one_point_cal(LCD5110_t *lcd5110)
 }
 
 
-void two_point_cal_start(LCD5110_t *lcd5110)
+void two_point_cal_start(void)
 {
+    LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
+
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
@@ -170,9 +172,12 @@ void two_point_cal_start(LCD5110_t *lcd5110)
 }
 
 
-void two_point_cal(LCD5110_t *lcd5110)
+void two_point_cal(void)
 {
+    LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
+    SENSOR_t *ph_sensor = (SENSOR_t *) SENSOR_ADDR;
     char count_buf[8];
+    uint32_t adc_val = 0;
 
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
@@ -190,10 +195,7 @@ void two_point_cal(LCD5110_t *lcd5110)
     lcd5110->set_cursor(3,5);
     lcd5110->print_str(count_buf);
 
-    adc_val = 0;
-    for (uint32_t i=0; i<adc_ph_samples; i++)
-        adc_val += (*(adc_ph_data + i) >> 4) & 0xFFF;
-    adc_val /= adc_ph_samples;
+    adc_val = ph_sensor->read_samples();
 
     if (count != 0xFF)
         cal_buffer[count] = adc_val;
@@ -225,8 +227,10 @@ void two_point_cal(LCD5110_t *lcd5110)
 }
 
 
-void three_point_cal_start(LCD5110_t *lcd5110)
+void three_point_cal_start(void)
 {
+    LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
+
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
@@ -251,9 +255,12 @@ void three_point_cal_start(LCD5110_t *lcd5110)
 }
 
 
-void three_point_cal(LCD5110_t *lcd5110)
+void three_point_cal(void)
 {
+    LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
+    SENSOR_t *ph_sensor = (SENSOR_t *) SENSOR_ADDR;
     char count_buf[8];
+    uint32_t adc_val = 0;
 
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
@@ -273,10 +280,7 @@ void three_point_cal(LCD5110_t *lcd5110)
     lcd5110->set_cursor(3,5);
     lcd5110->print_str(count_buf);
 
-    adc_val = 0;
-    for (uint32_t i=0; i<adc_ph_samples; i++)
-        adc_val += (*(adc_ph_data + i) >> 4) & 0xFFF;
-    adc_val /= adc_ph_samples;
+    adc_val = ph_sensor->read_samples();
 
     if (count != 0xFF)
         cal_buffer[count] = adc_val;
@@ -333,9 +337,10 @@ void three_point_cal(LCD5110_t *lcd5110)
 }
 
 
-void calibration_complete(LCD5110_t *lcd5110)
+void calibration_complete(void)
 {
     static uint8_t i = 0;
+    LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
 
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);

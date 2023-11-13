@@ -5,12 +5,10 @@
  *      Author: felipe
  */
 
-//#include <lpc17xx_timer.h>
-
 #include "fsm.h"
-//#include "calibration.h"
+#include "calibration.h"
 #include "menu.h"
-#include "sensor.h"
+#include "sensor_view.h"
 
 event_t event = EV_NONE;
 
@@ -100,9 +98,8 @@ static void run(FSM_t *fsm)
 }
 
 
-void init_fsm(FSM_t *fsm, LCD5110_t *lcd5110)
+void init_fsm(FSM_t *fsm)
 {
-    fsm->lcd5110 = lcd5110;
     fsm->current_state = ST_PH;
     fsm->init_st = state_func_matrix[0].init;
     fsm->exit_st = state_func_matrix[0].exit;
