@@ -4,6 +4,7 @@
 
 #include <cr_section_macros.h>
 
+#include <string.h>
 #include <lpc17xx_adc.h>
 #include <lpc17xx_gpdma.h>
 #include <lpc17xx_gpio.h>
@@ -24,7 +25,7 @@
 #define UP (1 << 11)
 #define DOWN (1 << 10)
 
-
+void init_memory_addr(void);
 void init_gpio(void);
 void init_i2c(void);
 void init_spi(void);
@@ -35,28 +36,13 @@ void init_systick(void);
 void init_interrupts(void);
 
 FSM_t fsm;
-LCD5110_t lcd_5110;
-AT24C_t at24c08_eeprom;
-SENSOR_t pHsensor;
 
 GPDMA_LLI_Type adc_lli;
 
 
 int main(void)
 {
-    uint32_t *adc_ph_data = (uint32_t *) DATA_ADDR;
-    for (int i=0; i<1024; i++)
-        *(adc_ph_data + i) = (uint32_t) 0;
-
-    LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
-    *lcd5110 = lcd_5110;
-
-    AT24C_t *at24c08 =(AT24C_t *) AT24C_ADDR;
-    *at24c08 = at24c08_eeprom;
-
-    SENSOR_t *ph_sensor = (SENSOR_t *) SENSOR_ADDR;
-    *ph_sensor = pHsensor;
-
+    init_memory_addr();
     init_gpio();
     init_i2c();
     init_spi();
@@ -66,16 +52,20 @@ int main(void)
     init_systick();
     init_interrupts();
 
-    init_lcd5110(lcd5110, LPC_SSP1);
-    init_eeprom(at24c08, (uint8_t) 0x50, LPC_I2C1);
-    init_sensor(ph_sensor);
+    init_lcd5110((LCD5110_t *) LCD5110_ADDR, LPC_SSP1);
+    init_eeprom((AT24C_t *) AT24C_ADDR, AT24C08, (uint8_t) 0x50, LPC_I2C1);
+    init_sensor((SENSOR_t *) SENSOR_ADDR);
     init_fsm(&fsm);
 
-    lcd5110->print_str("initializing");
-    for (int i=0; i<10000000; i++);
-    lcd5110->clear();
-
     fsm.run(&fsm);
+}
+
+
+void init_memory_addr(void)
+{
+    memset((uint32_t *) DATA_ADDR, 0x00, (uint32_t) N_SAMPLES * sizeof(uint32_t));
+    memset((uint32_t *) TX_DATA_ADDR, 0x00, (uint8_t) N_BYTES * sizeof(uint8_t));
+    memset((uint32_t *) RX_DATA_ADDR, 0x00, (uint8_t) N_BYTES * sizeof(uint8_t));
 }
 
 
