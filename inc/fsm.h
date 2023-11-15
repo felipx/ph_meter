@@ -12,6 +12,7 @@
 typedef enum {
     EV_ANY,
     EV_NONE,
+	EV_INIT_COMPLETE,
     EV_SELECT_PUSHED,
     EV_PH_SELECTED,
     EV_MV_SELECTED,
@@ -30,6 +31,7 @@ extern event_t event;
 
 
 typedef enum {
+	ST_INIT,
     ST_PH,
     ST_MV,
     ST_MAIN_MENU,

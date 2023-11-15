@@ -15,14 +15,18 @@
 
 #define LCD5110_ADDR (0x20080000)
 
-typedef struct {
+typedef struct display LCD5110_t;
 
-	void (*set_cursor) (unsigned char row, unsigned char col);
-	void (*clear) (void);
-	void (*send_cmd) (char cmd);
-	void (*print_str) (const char str[]);
-	void (*print_big_str) (const char str[]);
-	void (*set_inverse) (uint8_t inv);
+typedef struct display {
+
+	LPC_SSP_TypeDef* SSPx;
+	uint8_t inverse;
+	void (*set_cursor) (LCD5110_t *lcd5110, unsigned char row, unsigned char col);
+	void (*clear) (LCD5110_t *lcd5110);
+	void (*send_cmd) (LCD5110_t *lcd5110, char cmd);
+	void (*print_str) (LCD5110_t *lcd5110, const char str[]);
+	void (*print_big_str) (LCD5110_t *lcd5110, const char str[]);
+	void (*set_inverse) (LCD5110_t *lcd5110, uint8_t inv);
 	void (*reset) (void);
 
 } LCD5110_t;

@@ -63,6 +63,7 @@ void ph_view(void)
 
     char data_buf[8];
     char slope_buf[8];
+    char offset_buf[8];
     float pH;
     uint32_t adc_val = 0;
 
@@ -78,17 +79,22 @@ void ph_view(void)
 
     snprintf(data_buf, 8, "%.1f", pH);
     snprintf(slope_buf, 8, "%.01f", slope*1000);
-    lcd5110->clear();
-    lcd5110->set_cursor(2,1);
-    lcd5110->print_str("pH = ");
-    lcd5110->set_cursor(1,6);
-    lcd5110->print_big_str(data_buf);
+    snprintf(offset_buf, 8, "%.01f", offset);
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 2,1);
+    lcd5110->print_str(lcd5110, "pH = ");
+    lcd5110->set_cursor(lcd5110, 1,6);
+    lcd5110->print_big_str(lcd5110, data_buf);
 
-    lcd5110->set_cursor(5,0);
-    lcd5110->print_str("S= ");
-    lcd5110->print_str(slope_buf);
-    lcd5110->print_str("mV/pH");
+    lcd5110->set_cursor(lcd5110, 4,0);
+    lcd5110->print_str(lcd5110, "S= ");
+    lcd5110->print_str(lcd5110, slope_buf);
+    lcd5110->print_str(lcd5110, "mV/pH");
 
+    lcd5110->set_cursor(lcd5110, 5,0);
+    lcd5110->print_str(lcd5110, "off= ");
+    lcd5110->print_str(lcd5110, offset_buf);
+    lcd5110->print_str(lcd5110, "V");
 }
 
 
@@ -109,12 +115,12 @@ void mv_view(void)
     mv_val = ((float)adc_val/4095)*3.3;
     snprintf(data_buf, 8, "%.02f", mv_val);
 
-    lcd5110->clear();
-    lcd5110->set_cursor(2,2);
-    lcd5110->print_str("V  = ");
-    lcd5110->print_str(data_buf);
-    lcd5110->set_cursor(4,2);
-    lcd5110->print_str("mV = ");
-    lcd5110->set_cursor(5,3);
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 2,2);
+    lcd5110->print_str(lcd5110, "V  = ");
+    lcd5110->print_str(lcd5110, data_buf);
+    lcd5110->set_cursor(lcd5110, 4,2);
+    lcd5110->print_str(lcd5110, "mV = ");
+    lcd5110->set_cursor(lcd5110, 5,3);
 }
 

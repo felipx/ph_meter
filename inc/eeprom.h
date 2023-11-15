@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <lpc17xx_i2c.h>
 
-#define AT24C_ADDR (0x20080020)
+#define AT24C08_ADDR (0x20081000)
 #define TX_DATA_ADDR (0x2007D000)
 #define RX_DATA_ADDR (0x2007D400)
 #define N_BYTES (1024)

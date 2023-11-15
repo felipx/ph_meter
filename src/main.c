@@ -53,7 +53,7 @@ int main(void)
     init_interrupts();
 
     init_lcd5110((LCD5110_t *) LCD5110_ADDR, LPC_SSP1);
-    init_eeprom((AT24C_t *) AT24C_ADDR, AT24C08, (uint8_t) 0x50, LPC_I2C1);
+    init_eeprom((AT24C_t *) AT24C08_ADDR, AT24C08, (uint8_t) 0x50, LPC_I2C1);
     init_sensor((SENSOR_t *) SENSOR_ADDR);
     init_fsm(&fsm);
 
@@ -117,7 +117,7 @@ void init_gpio(void)
 void init_i2c(void)
 {
     I2C_Init(LPC_I2C1, 10000);
-    I2C_Cmd(LPC_I2C1, ENABLE);
+    I2C_Cmd(LPC_I2C1, DISABLE);
 }
 
 

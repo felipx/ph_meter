@@ -7,6 +7,7 @@
 
 #include "fsm.h"
 #include "calibration.h"
+#include "init.h"
 #include "menu.h"
 #include "sensor_view.h"
 
@@ -29,6 +30,7 @@ typedef struct {
 
 static state_function_t state_func_matrix[] = {
     // NAME           // INIT           // EXIT           // FUNC
+    {ST_INIT,         init_init,        exit_init,        init                 },
     {ST_PH,           init_sensor_view, exit_sensor_view, ph_view              },
     {ST_MV,           init_sensor_view, exit_sensor_view, mv_view              },
     {ST_MAIN_MENU,    init_menu,        exit_menu,        main_menu            },
@@ -45,6 +47,7 @@ static state_function_t state_func_matrix[] = {
 
 static matrix_row_t transition_matrix[] = {
     // CURR STATE     // EVENT             // NEXT STATE
+    {ST_INIT,         EV_INIT_COMPLETE,    ST_PH          },
     {ST_PH,           EV_SELECT_PUSHED,    ST_MAIN_MENU   },
     {ST_MV,           EV_SELECT_PUSHED,    ST_MAIN_MENU   },
     {ST_MAIN_MENU,    EV_PH_SELECTED  ,    ST_PH          },
@@ -100,7 +103,7 @@ static void run(FSM_t *fsm)
 
 void init_fsm(FSM_t *fsm)
 {
-    fsm->current_state = ST_PH;
+    fsm->current_state = ST_INIT;
     fsm->init_st = state_func_matrix[0].init;
     fsm->exit_st = state_func_matrix[0].exit;
     fsm->function = state_func_matrix[0].function;

@@ -51,7 +51,7 @@ static void write_byte(AT24C_t *eeprom, uint8_t data, uint16_t addr)
     i2c_transfer_cfg.retransmissions_max = 0;
 
     I2C_MasterTransferData(eeprom->I2Cx, &i2c_transfer_cfg, I2C_TRANSFER_POLLING);
-    for (int i=0; i<10000; i++);
+    for (int i=0; i<100000; i++);
 }
 
 
@@ -95,7 +95,7 @@ static void write_half_word(AT24C_t *eeprom, uint16_t data, uint16_t addr)
     i2c_transfer_cfg.retransmissions_max = 0;
 
     I2C_MasterTransferData(eeprom->I2Cx, &i2c_transfer_cfg, I2C_TRANSFER_POLLING);
-    for (int i=0; i<10000; i++);
+    for (int i=0; i<100000; i++);
 }
 
 
@@ -139,7 +139,7 @@ static void write_word(AT24C_t *eeprom, uint32_t data, uint16_t addr)
     i2c_transfer_cfg.retransmissions_max = 0;
 
     I2C_MasterTransferData(eeprom->I2Cx, &i2c_transfer_cfg, I2C_TRANSFER_POLLING);
-    for (int i=0; i<10000; i++);
+    for (int i=0; i<100000; i++);
 }
 
 
@@ -183,7 +183,7 @@ static void write_data(AT24C_t *eeprom, uint8_t *data, uint32_t size, uint16_t a
     i2c_transfer_cfg.retransmissions_max = 0;
 
     I2C_MasterTransferData(eeprom->I2Cx, &i2c_transfer_cfg, I2C_TRANSFER_POLLING);
-    for (int i=0; i<10000; i++);
+    for (int i=0; i<100000; i++);
 }
 
 

@@ -41,36 +41,36 @@ void main_menu(void)
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
-    lcd5110->clear();
-    lcd5110->set_cursor(0,3);
-    lcd5110->print_str("MAIN MENU");
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 0,3);
+    lcd5110->print_str(lcd5110, "MAIN MENU");
 
-    lcd5110->set_cursor(2,3);
+    lcd5110->set_cursor(lcd5110, 2,3);
     if (select == 0) {
-        lcd5110->set_inverse(1);
-        lcd5110->print_str("pH");
-        lcd5110->set_inverse(0);
+        lcd5110->set_inverse(lcd5110, 1);
+        lcd5110->print_str(lcd5110, "pH");
+        lcd5110->set_inverse(lcd5110, 0);
     }
     else
-        lcd5110->print_str("pH");
+        lcd5110->print_str(lcd5110, "pH");
 
-    lcd5110->set_cursor(3,3);
+    lcd5110->set_cursor(lcd5110, 3,3);
     if (select == 1) {
-        lcd5110->set_inverse(1);
-        lcd5110->print_str("mV");
-        lcd5110->set_inverse(0);
+        lcd5110->set_inverse(lcd5110, 1);
+        lcd5110->print_str(lcd5110, "mV");
+        lcd5110->set_inverse(lcd5110, 0);
     }
     else
-        lcd5110->print_str("mV");
+        lcd5110->print_str(lcd5110, "mV");
 
-    lcd5110->set_cursor(4,3);
+    lcd5110->set_cursor(lcd5110, 4,3);
     if (select == 2) {
-        lcd5110->set_inverse(1);
-        lcd5110->print_str("Cal");
-        lcd5110->set_inverse(0);
+        lcd5110->set_inverse(lcd5110, 1);
+        lcd5110->print_str(lcd5110, "Cal");
+        lcd5110->set_inverse(lcd5110, 0);
     }
     else
-        lcd5110->print_str("Cal");
+        lcd5110->print_str(lcd5110, "Cal");
 }
 
 
@@ -82,42 +82,42 @@ void cal_menu(void)
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
-    lcd5110->clear();
+    lcd5110->clear(lcd5110);
 
-    lcd5110->set_cursor(1,2);
+    lcd5110->set_cursor(lcd5110, 1,2);
     if (select == 0) {
-        lcd5110->set_inverse(1);
-        lcd5110->print_str("1 Point Cal");
-        lcd5110->set_inverse(0);
+        lcd5110->set_inverse(lcd5110, 1);
+        lcd5110->print_str(lcd5110, "1 Point Cal");
+        lcd5110->set_inverse(lcd5110, 0);
     }
     else
-        lcd5110->print_str("1 Point Cal");
+        lcd5110->print_str(lcd5110, "1 Point Cal");
 
-    lcd5110->set_cursor(2,2);
+    lcd5110->set_cursor(lcd5110, 2,2);
     if (select == 1) {
-        lcd5110->set_inverse(1);
-        lcd5110->print_str("2 Point Cal");
-        lcd5110->set_inverse(0);
+        lcd5110->set_inverse(lcd5110, 1);
+        lcd5110->print_str(lcd5110, "2 Point Cal");
+        lcd5110->set_inverse(lcd5110, 0);
     }
     else
-        lcd5110->print_str("2 Point Cal");
+        lcd5110->print_str(lcd5110, "2 Point Cal");
 
-    lcd5110->set_cursor(3,2);
+    lcd5110->set_cursor(lcd5110, 3,2);
     if (select == 2) {
-        lcd5110->set_inverse(1);
-        lcd5110->print_str("3 Point Cal");
-        lcd5110->set_inverse(0);
+        lcd5110->set_inverse(lcd5110, 1);
+        lcd5110->print_str(lcd5110, "3 Point Cal");
+        lcd5110->set_inverse(lcd5110, 0);
     }
     else
-        lcd5110->print_str("3 Point Cal");
+        lcd5110->print_str(lcd5110, "3 Point Cal");
 
-    lcd5110->set_cursor(4,2);
+    lcd5110->set_cursor(lcd5110, 4,2);
     if (select == 3) {
-        lcd5110->set_inverse(1);
-        lcd5110->print_str("Back");
-        lcd5110->set_inverse(0);
+        lcd5110->set_inverse(lcd5110, 1);
+        lcd5110->print_str(lcd5110, "Back");
+        lcd5110->set_inverse(lcd5110, 0);
     }
     else
-        lcd5110->print_str("Back");
+        lcd5110->print_str(lcd5110, "Back");
 }
 

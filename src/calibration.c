@@ -10,6 +10,7 @@
 #include <lpc17xx_timer.h>
 
 #include "calibration.h"
+#include "eeprom.h"
 #include "fsm.h"
 #include "sensor.h"
 
@@ -41,6 +42,19 @@ static uint32_t cal_buffer[COUNT_START];
 static uint8_t point = 0;
 static float pH[3] = {7.0, 10.0, 4.0};
 static float mV[3] = {0.0, 0.0, 0.0};
+
+
+static void save_results(void)
+{
+    AT24C_t *at24c08 = (AT24C_t *) AT24C08_ADDR;
+
+    I2C_Cmd(LPC_I2C1, ENABLE);
+
+    at24c08->write_word(at24c08, *((uint32_t *) &slope), 0x00);
+    at24c08->write_word(at24c08, *((uint32_t *) &offset), 0x04);
+
+    I2C_Cmd(LPC_I2C1, DISABLE);
+}
 
 
 void init_cal_start(void)
@@ -86,19 +100,19 @@ void one_point_cal_start(void)
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
-    lcd5110->clear();
-    lcd5110->set_cursor(0,1);
-    lcd5110->print_str("1 POINT CAL");
-    lcd5110->set_cursor(1,0);
-    lcd5110->print_str("Insert Probe");
-    lcd5110->set_cursor(2,0);
-    lcd5110->print_str("Into pH 7");
-    lcd5110->set_cursor(3,0);
-    lcd5110->print_str("Solution. Then");
-    lcd5110->set_cursor(4,0);
-    lcd5110->print_str("Press ENTER to");
-    lcd5110->set_cursor(5,0);
-    lcd5110->print_str("Start");
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 0,1);
+    lcd5110->print_str(lcd5110, "1 POINT CAL");
+    lcd5110->set_cursor(lcd5110, 1,0);
+    lcd5110->print_str(lcd5110, "Insert Probe");
+    lcd5110->set_cursor(lcd5110, 2,0);
+    lcd5110->print_str(lcd5110, "Into pH 7");
+    lcd5110->set_cursor(lcd5110, 3,0);
+    lcd5110->print_str(lcd5110, "Solution. Then");
+    lcd5110->set_cursor(lcd5110, 4,0);
+    lcd5110->print_str(lcd5110, "Press ENTER to");
+    lcd5110->set_cursor(lcd5110, 5,0);
+    lcd5110->print_str(lcd5110, "Start");
 }
 
 
@@ -114,13 +128,13 @@ void one_point_cal(void)
 
     snprintf(count_buf, 8, "0:%d", count--);
 
-    lcd5110->clear();
-    lcd5110->set_cursor(0,1);
-    lcd5110->print_str("1 POINT CAL");
-    lcd5110->set_cursor(1,5);
-    lcd5110->print_str("pH 7");
-    lcd5110->set_cursor(3,5);
-    lcd5110->print_str(count_buf);
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 0,1);
+    lcd5110->print_str(lcd5110, "1 POINT CAL");
+    lcd5110->set_cursor(lcd5110, 1,5);
+    lcd5110->print_str(lcd5110, "pH 7");
+    lcd5110->set_cursor(lcd5110, 3,5);
+    lcd5110->print_str(lcd5110, count_buf);
 
     adc_val = ph_sensor->read_samples();
 
@@ -140,7 +154,7 @@ void one_point_cal(void)
         mV[0] = ((float)cal_avg/4095.0)*3.3;
         offset = 3.3;
         slope = (mV[0]-offset)/((float)pH[0]);
-
+        save_results();
         event = EV_CAL_COMPLETE;
     }
 }
@@ -153,22 +167,22 @@ void two_point_cal_start(void)
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
-    lcd5110->clear();
-    lcd5110->set_cursor(0,1);
-    lcd5110->print_str("2 POINT CAL");
-    lcd5110->set_cursor(1,0);
-    lcd5110->print_str("Insert Probe");
-    lcd5110->set_cursor(2,0);
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 0,1);
+    lcd5110->print_str(lcd5110, "2 POINT CAL");
+    lcd5110->set_cursor(lcd5110, 1,0);
+    lcd5110->print_str(lcd5110, "Insert Probe");
+    lcd5110->set_cursor(lcd5110, 2,0);
     if (point == 0)
-        lcd5110->print_str("Into pH 4");
+        lcd5110->print_str(lcd5110, "Into pH 4");
     else
-        lcd5110->print_str("Into pH 10");
-    lcd5110->set_cursor(3,0);
-    lcd5110->print_str("Solution. Then");
-    lcd5110->set_cursor(4,0);
-    lcd5110->print_str("Press ENTER to");
-    lcd5110->set_cursor(5,0);
-    lcd5110->print_str("Start");
+        lcd5110->print_str(lcd5110, "Into pH 10");
+    lcd5110->set_cursor(lcd5110, 3,0);
+    lcd5110->print_str(lcd5110, "Solution. Then");
+    lcd5110->set_cursor(lcd5110, 4,0);
+    lcd5110->print_str(lcd5110, "Press ENTER to");
+    lcd5110->set_cursor(lcd5110, 5,0);
+    lcd5110->print_str(lcd5110, "Start");
 }
 
 
@@ -184,16 +198,16 @@ void two_point_cal(void)
 
     snprintf(count_buf, 8, "0:%d", count--);
 
-    lcd5110->clear();
-    lcd5110->set_cursor(0,1);
-    lcd5110->print_str("2 POINT CAL");
-    lcd5110->set_cursor(1,5);
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 0,1);
+    lcd5110->print_str(lcd5110, "2 POINT CAL");
+    lcd5110->set_cursor(lcd5110, 1,5);
     if (point == 0)
-        lcd5110->print_str("pH 4");
+        lcd5110->print_str(lcd5110, "pH 4");
     else
-        lcd5110->print_str("pH 10");
-    lcd5110->set_cursor(3,5);
-    lcd5110->print_str(count_buf);
+        lcd5110->print_str(lcd5110, "pH 10");
+    lcd5110->set_cursor(lcd5110, 3,5);
+    lcd5110->print_str(lcd5110, count_buf);
 
     adc_val = ph_sensor->read_samples();
 
@@ -221,6 +235,7 @@ void two_point_cal(void)
             mV[1] = ((float)cal_avg/4095.0)*3.3;
             slope = (mV[1]-mV[0])/(pH[1]-pH[0]);
             offset = mV[1] - slope*pH[1];
+            save_results();
             event = EV_CAL_COMPLETE;
         }
     }
@@ -234,24 +249,24 @@ void three_point_cal_start(void)
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
-    lcd5110->clear();
-    lcd5110->set_cursor(0,1);
-    lcd5110->print_str("3 POINT CAL");
-    lcd5110->set_cursor(1,0);
-    lcd5110->print_str("Insert Probe");
-    lcd5110->set_cursor(2,0);
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 0,1);
+    lcd5110->print_str(lcd5110, "3 POINT CAL");
+    lcd5110->set_cursor(lcd5110, 1,0);
+    lcd5110->print_str(lcd5110, "Insert Probe");
+    lcd5110->set_cursor(lcd5110, 2,0);
     if (point == 0)
-        lcd5110->print_str("Into pH 7");
+        lcd5110->print_str(lcd5110, "Into pH 7");
     else if (point == 1)
-        lcd5110->print_str("Into pH 10");
+        lcd5110->print_str(lcd5110, "Into pH 10");
     else
-        lcd5110->print_str("Into pH 4");
-    lcd5110->set_cursor(3,0);
-    lcd5110->print_str("Solution. Then");
-    lcd5110->set_cursor(4,0);
-    lcd5110->print_str("Press ENTER to");
-    lcd5110->set_cursor(5,0);
-    lcd5110->print_str("Start");
+        lcd5110->print_str(lcd5110, "Into pH 4");
+    lcd5110->set_cursor(lcd5110, 3,0);
+    lcd5110->print_str(lcd5110, "Solution. Then");
+    lcd5110->set_cursor(lcd5110, 4,0);
+    lcd5110->print_str(lcd5110, "Press ENTER to");
+    lcd5110->set_cursor(lcd5110, 5,0);
+    lcd5110->print_str(lcd5110, "Start");
 }
 
 
@@ -267,18 +282,18 @@ void three_point_cal(void)
 
     snprintf(count_buf, 8, "0:%d", count--);
 
-    lcd5110->clear();
-    lcd5110->set_cursor(0,1);
-    lcd5110->print_str("3 POINT CAL");
-    lcd5110->set_cursor(1,5);
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 0,1);
+    lcd5110->print_str(lcd5110, "3 POINT CAL");
+    lcd5110->set_cursor(lcd5110, 1,5);
     if (point == 0)
-        lcd5110->print_str("pH 7");
+        lcd5110->print_str(lcd5110, "pH 7");
     else if (point == 1)
-        lcd5110->print_str("pH 10");
+        lcd5110->print_str(lcd5110, "pH 10");
     else
-        lcd5110->print_str("pH 4");
-    lcd5110->set_cursor(3,5);
-    lcd5110->print_str(count_buf);
+        lcd5110->print_str(lcd5110, "pH 4");
+    lcd5110->set_cursor(lcd5110, 3,5);
+    lcd5110->print_str(lcd5110, count_buf);
 
     adc_val = ph_sensor->read_samples();
 
@@ -331,6 +346,7 @@ void three_point_cal(void)
 
             slope = Sxy/Sxx;
             offset = mV_mean - (slope*pH_mean);
+            save_results();
             event = EV_CAL_COMPLETE;
         }
     }
@@ -345,11 +361,11 @@ void calibration_complete(void)
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
     TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
-    lcd5110->clear();
-    lcd5110->set_cursor(1,1);
-    lcd5110->print_str("Calibration");
-    lcd5110->set_cursor(3,2);
-    lcd5110->print_str("Complete!");
+    lcd5110->clear(lcd5110);
+    lcd5110->set_cursor(lcd5110, 1,1);
+    lcd5110->print_str(lcd5110, "Calibration");
+    lcd5110->set_cursor(lcd5110, 3,2);
+    lcd5110->print_str(lcd5110, "Complete!");
 
     i++;
     if (i == 3) {
