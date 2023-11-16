@@ -1,0 +1,7 @@
+CMSISv2p00_LPC17xx
+Debug
+Release
+Includes
+Binaries
+src/crp.c
+src/cr_startup_lpc175x_6x.c
