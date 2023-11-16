@@ -103,8 +103,10 @@ void mv_view(void)
     LCD5110_t *lcd5110 = (LCD5110_t *) LCD5110_ADDR;
     SENSOR_t *ph_sensor = (SENSOR_t *) SENSOR_ADDR;
 
-    static float mv_val = 0;
-    char data_buf[8];
+    static float v_val =0.0;
+    static float mv_val = 0.0;
+    char v_buf[8];
+    char mv_buf[8];
     uint32_t adc_val = 0;
 
     while (!TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT));
@@ -112,15 +114,17 @@ void mv_view(void)
 
     adc_val = ph_sensor->read_samples();
 
-    mv_val = ((float)adc_val/4095)*3.3;
-    snprintf(data_buf, 8, "%.02f", mv_val);
+    v_val = ((float)adc_val/4095)*3.3;
+    mv_val = ((v_val*0.66)/2 - 0.71)*1000;
+    snprintf(v_buf, 8, "%.02f", v_val);
+    snprintf(mv_buf, 8, "%.02f", mv_val);
 
     lcd5110->clear(lcd5110);
     lcd5110->set_cursor(lcd5110, 2,2);
     lcd5110->print_str(lcd5110, "V  = ");
-    lcd5110->print_str(lcd5110, data_buf);
+    lcd5110->print_str(lcd5110, v_buf);
     lcd5110->set_cursor(lcd5110, 4,2);
     lcd5110->print_str(lcd5110, "mV = ");
-    lcd5110->set_cursor(lcd5110, 5,3);
+    lcd5110->print_str(lcd5110, mv_buf);
 }
 

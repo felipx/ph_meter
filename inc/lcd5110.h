@@ -15,12 +15,20 @@
 
 #define LCD5110_ADDR (0x20080000)
 
+
+typedef struct {
+    unsigned char row; // 6 rows
+    unsigned char col; // 14 cols
+} coords_t;
+
+
 typedef struct display LCD5110_t;
 
 typedef struct display {
 
 	LPC_SSP_TypeDef* SSPx;
 	uint8_t inverse;
+	coords_t coords;
 	void (*set_cursor) (LCD5110_t *lcd5110, unsigned char row, unsigned char col);
 	void (*clear) (LCD5110_t *lcd5110);
 	void (*send_cmd) (LCD5110_t *lcd5110, char cmd);

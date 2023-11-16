@@ -144,14 +144,6 @@ typedef enum {
 } CMD_t;
 
 
-typedef struct {
-    unsigned char row; // 6 rows
-    unsigned char col; // 14 cols
-} coords_t;
-
-coords_t coords;
-
-
 static void delay(void)
 {
     for (int i=0; i<200; i++);
@@ -188,8 +180,8 @@ static void set_cursor(LCD5110_t *lcd5110, unsigned char row, unsigned char col)
     send_cmd(lcd5110, 0x40 | row);
     send_cmd(lcd5110, 0x80 | col*6);
 
-    coords.row = row;
-    coords.col = col;
+    lcd5110->coords.row = row;
+    lcd5110->coords.col = col;
 }
 
 
@@ -235,7 +227,7 @@ static void print_big_str(LCD5110_t *lcd5110, const char str[])
         index++;
     }
 
-    set_cursor(lcd5110, coords.row + 1, coords.col);
+    set_cursor(lcd5110, lcd5110->coords.row + 1, lcd5110->coords.col);
 
     index = 0;
     while (str[index] != '\0') {
@@ -277,6 +269,8 @@ void init_lcd5110(LCD5110_t *lcd5110, LPC_SSP_TypeDef* SSPx)
     else
         return;
 
+    lcd5110->coords.col = 0;
+    lcd5110->coords.row = 0;
     lcd5110->inverse = 0;
     lcd5110->clear = clear;
     lcd5110->set_cursor = set_cursor;
